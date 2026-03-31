@@ -3,6 +3,7 @@ package main
 import "strings"
 
 func cleanInput(text string) []string {
-	words := strings.Split(strings.ToLower(text), " ")
+	lowerText := strings.ToLower(text)
+	words := strings.Fields(lowerText)
 	return words
 }
