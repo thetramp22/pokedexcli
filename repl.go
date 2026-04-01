@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/thetramp22/pokedexcli/internal/pokeData"
+	"github.com/thetramp22/pokedexcli/internal/pokedata"
 )
 
 func cleanInput(text string) []string {
@@ -87,7 +87,7 @@ func commandMap(cfg *config) error {
 		return nil
 	}
 
-	locationArea, err := pokeData.GetLocationArea(url)
+	locationArea, err := pokedata.GetLocationArea(url, cfg.Cache)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -109,7 +109,7 @@ func commandMapb(cfg *config) error {
 		return nil
 	}
 
-	locationArea, err := pokeData.GetLocationArea(url)
+	locationArea, err := pokedata.GetLocationArea(url, cfg.Cache)
 	if err != nil {
 		fmt.Println(err)
 	}
