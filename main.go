@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/thetramp22/pokedexcli/internal/pokecache"
+	"github.com/thetramp22/pokedexcli/internal/pokedata"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
 		Next:     nil,
 		Previous: nil,
 		Cache:    pokecache.NewCache(interval),
+		UserDex:  map[string]pokedata.Pokemon{},
 	}
 	startRepl(&cfg)
 }
@@ -26,4 +28,5 @@ type config struct {
 	Next     *string
 	Previous *string
 	Cache    *pokecache.Cache
+	UserDex  map[string]pokedata.Pokemon
 }

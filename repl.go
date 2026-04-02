@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 
@@ -66,6 +67,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "Displays a list of Pokemon that reside in the given area",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Attempt to catch the given Pokemon and add it to your Pokedex",
+			callback:    commandCatch,
 		},
 	}
 }
@@ -144,5 +150,29 @@ func commandExplore(cfg *config, area string) error {
 	for _, result := range locationArea.PokemonEncounters {
 		fmt.Printf("- %v\n", result.Pokemon.Name)
 	}
+	return nil
+}
+
+func commandCatch(cfg *config, pokemon string) error {
+	if pokemon == "" {
+		return fmt.Errorf("Please enter a valid Pokemon")
+	}
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%v/", pokemon)
+	currentPokemon, err := pokedata.GetPokemon(url, cfg.Cache)
+	if err != nil {
+		return fmt.Errorf("%v is not a valid Pokemon", pokemon)
+	}
+	if _, ok := cfg.UserDex[pokemon]; ok {
+		fmt.Printf("You already have a %v in your Pokedex\n", pokemon)
+		return nil
+	}
+	fmt.Printf("Throwing a Pokeball at %v...\n", currentPokemon.Name)
+	attempt := rand.Intn(400)
+	if attempt < currentPokemon.BaseExperience {
+		fmt.Printf("%v escaped!\n", currentPokemon.Name)
+		return nil
+	}
+	fmt.Printf("%v was caught!\n", currentPokemon.Name)
+	cfg.UserDex[currentPokemon.Name] = currentPokemon
 	return nil
 }

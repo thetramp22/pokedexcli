@@ -96,3 +96,42 @@ func GetLocationArea(url string, cache *pokecache.Cache) (LocationArea, error) {
 	cache.Add(url, data)
 	return locationArea, nil
 }
+
+type Pokemon struct {
+	Id             int    `json:"id"`
+	Name           string `json:"name"`
+	BaseExperience int    `json:"base_experience"`
+}
+
+func GetPokemon(url string, cache *pokecache.Cache) (Pokemon, error) {
+	data := []byte{}
+
+	// get cached data if available
+	if cachedData, ok := cache.Get(url); ok {
+		data = cachedData
+	} else {
+		// fetch data
+		res, err := http.Get(url)
+		if err != nil {
+			return Pokemon{}, err
+		}
+		fetchedData, err := io.ReadAll(res.Body)
+		res.Body.Close()
+		if res.StatusCode > 299 {
+			return Pokemon{}, fmt.Errorf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, fetchedData)
+		}
+		if err != nil {
+			return Pokemon{}, err
+		}
+		data = fetchedData
+	}
+
+	// unmarshal data
+	pokemon := Pokemon{}
+	err := json.Unmarshal(data, &pokemon)
+	if err != nil {
+		return Pokemon{}, err
+	}
+	cache.Add(url, data)
+	return pokemon, nil
+}
