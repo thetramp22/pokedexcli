@@ -17,16 +17,3 @@ func main() {
 	}
 	startRepl(&cfg)
 }
-
-type cliCommand struct {
-	name        string
-	description string
-	callback    func(*config, string) error
-}
-
-type config struct {
-	Next     *string
-	Previous *string
-	Cache    *pokecache.Cache
-	UserDex  map[string]pokedata.Pokemon
-}

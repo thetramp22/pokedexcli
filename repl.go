@@ -3,12 +3,25 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
 
+	"github.com/thetramp22/pokedexcli/internal/pokecache"
 	"github.com/thetramp22/pokedexcli/internal/pokedata"
 )
+
+type cliCommand struct {
+	name        string
+	description string
+	callback    func(*config, ...string) error
+}
+
+type config struct {
+	Next     *string
+	Previous *string
+	Cache    *pokecache.Cache
+	UserDex  map[string]pokedata.Pokemon
+}
 
 func cleanInput(text string) []string {
 	lowerText := strings.ToLower(text)
@@ -24,17 +37,20 @@ func startRepl(cfg *config) {
 		scanner.Scan()
 		line := scanner.Text()
 		words := cleanInput(line)
+		if len(words) == 0 {
+			continue
+		}
 		command := words[0]
-		param1 := ""
+		args := []string{}
 		if len(words) == 2 {
-			param1 = words[1]
+			args = words[1:]
 		}
 		commands := getCommands()
 		if _, ok := commands[command]; !ok {
 			fmt.Println("Unknown command")
 			continue
 		}
-		err := commands[command].callback(cfg, param1)
+		err := commands[command].callback(cfg, args...)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 		}
@@ -84,139 +100,4 @@ func getCommands() map[string]cliCommand {
 			callback:    commandPokedex,
 		},
 	}
-}
-
-func commandExit(*config, string) error {
-	fmt.Print("Closing the Pokedex... Goodbye!\n")
-	os.Exit(0)
-	return nil
-}
-
-func commandHelp(*config, string) error {
-	fmt.Println("Welcome to the Pokedex!")
-	fmt.Println("Usage:ex")
-	commands := getCommands()
-	for _, command := range commands {
-		fmt.Printf("%v: %v\n", command.name, command.description)
-	}
-	return nil
-}
-
-func commandMap(cfg *config, s string) error {
-	url := "https://pokeapi.co/api/v2/location-area/"
-	if cfg.Next != nil {
-		url = *cfg.Next
-	}
-	if cfg.Previous != nil && cfg.Next == nil {
-		fmt.Println("You're on the last page")
-		return nil
-	}
-
-	locationAreas, err := pokedata.GetLocationAreas(url, cfg.Cache)
-	if err != nil {
-		return err
-	}
-	for _, result := range locationAreas.Results {
-		fmt.Println(result.Name)
-	}
-	cfg.Next = locationAreas.Next
-	cfg.Previous = locationAreas.Previous
-	return nil
-}
-
-func commandMapb(cfg *config, s string) error {
-	url := "https://pokeapi.co/api/v2/location-area/"
-	if cfg.Previous != nil {
-		url = *cfg.Previous
-	}
-	if cfg.Previous == nil {
-		fmt.Println("You're on the first page")
-		return nil
-	}
-
-	locationAreas, err := pokedata.GetLocationAreas(url, cfg.Cache)
-	if err != nil {
-		return err
-	}
-	for _, result := range locationAreas.Results {
-		fmt.Println(result.Name)
-	}
-	cfg.Next = locationAreas.Next
-	cfg.Previous = locationAreas.Previous
-	return nil
-}
-
-func commandExplore(cfg *config, area string) error {
-	if area == "" {
-		return fmt.Errorf("Please enter a valid area")
-	}
-	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%v/", area)
-	locationArea, err := pokedata.GetLocationArea(url, cfg.Cache)
-	if err != nil {
-		return fmt.Errorf("%v is not a valid area", area)
-	}
-	fmt.Printf("Exploring %v\n", locationArea.Name)
-	fmt.Println("Found Pokemon:")
-	for _, result := range locationArea.PokemonEncounters {
-		fmt.Printf("- %v\n", result.Pokemon.Name)
-	}
-	return nil
-}
-
-func commandCatch(cfg *config, pokemon string) error {
-	if pokemon == "" {
-		return fmt.Errorf("Please enter a valid Pokemon")
-	}
-	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%v/", pokemon)
-	currentPokemon, err := pokedata.GetPokemon(url, cfg.Cache)
-	if err != nil {
-		return fmt.Errorf("%v is not a valid Pokemon", pokemon)
-	}
-	if _, ok := cfg.UserDex[pokemon]; ok {
-		fmt.Printf("You already have a %v in your Pokedex\n", pokemon)
-		return nil
-	}
-	fmt.Printf("Throwing a Pokeball at %v...\n", currentPokemon.Name)
-	attempt := rand.Intn(400)
-	if attempt < currentPokemon.BaseExperience {
-		fmt.Printf("%v escaped!\n", currentPokemon.Name)
-		return nil
-	}
-	fmt.Printf("%v was caught!\n", currentPokemon.Name)
-	cfg.UserDex[currentPokemon.Name] = currentPokemon
-	return nil
-}
-
-func commandInspect(cfg *config, pokemon string) error {
-	if pokemon == "" {
-		return fmt.Errorf("Please enter a valid Pokemon")
-	}
-	if _, ok := cfg.UserDex[pokemon]; !ok {
-		return fmt.Errorf("You have not caught that Pokemon")
-	}
-	currentPokemon := cfg.UserDex[pokemon]
-	fmt.Printf("Name: %v\n", currentPokemon.Name)
-	fmt.Printf("Height: %v\n", currentPokemon.Height)
-	fmt.Printf("Weight: %v\n", currentPokemon.Weight)
-	fmt.Println("Stats:")
-	for _, stat := range currentPokemon.Stats {
-		fmt.Printf("  -%v: %v\n", stat.Stat.Name, stat.BaseStat)
-	}
-	fmt.Println("Types:")
-	for _, pType := range currentPokemon.Types {
-		fmt.Printf("  -%v\n", pType.Type.Name)
-	}
-	return nil
-}
-
-func commandPokedex(cfg *config, s string) error {
-	if len(cfg.UserDex) == 0 {
-		fmt.Println("Your Pokedex is empty")
-		return nil
-	}
-	fmt.Println("Your Pokedex:")
-	for _, pokemon := range cfg.UserDex {
-		fmt.Printf("  -%v\n", pokemon.Name)
-	}
-	return nil
 }
