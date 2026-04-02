@@ -73,6 +73,16 @@ func getCommands() map[string]cliCommand {
 			description: "Attempt to catch the given Pokemon and add it to your Pokedex",
 			callback:    commandCatch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a Pokemon from your Pokedex",
+			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Display the Pokemon in your Pokedex",
+			callback:    commandPokedex,
+		},
 	}
 }
 
@@ -174,5 +184,39 @@ func commandCatch(cfg *config, pokemon string) error {
 	}
 	fmt.Printf("%v was caught!\n", currentPokemon.Name)
 	cfg.UserDex[currentPokemon.Name] = currentPokemon
+	return nil
+}
+
+func commandInspect(cfg *config, pokemon string) error {
+	if pokemon == "" {
+		return fmt.Errorf("Please enter a valid Pokemon")
+	}
+	if _, ok := cfg.UserDex[pokemon]; !ok {
+		return fmt.Errorf("You have not caught that Pokemon")
+	}
+	currentPokemon := cfg.UserDex[pokemon]
+	fmt.Printf("Name: %v\n", currentPokemon.Name)
+	fmt.Printf("Height: %v\n", currentPokemon.Height)
+	fmt.Printf("Weight: %v\n", currentPokemon.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range currentPokemon.Stats {
+		fmt.Printf("  -%v: %v\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, pType := range currentPokemon.Types {
+		fmt.Printf("  -%v\n", pType.Type.Name)
+	}
+	return nil
+}
+
+func commandPokedex(cfg *config, s string) error {
+	if len(cfg.UserDex) == 0 {
+		fmt.Println("Your Pokedex is empty")
+		return nil
+	}
+	fmt.Println("Your Pokedex:")
+	for _, pokemon := range cfg.UserDex {
+		fmt.Printf("  -%v\n", pokemon.Name)
+	}
 	return nil
 }
