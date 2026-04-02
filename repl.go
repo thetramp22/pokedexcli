@@ -17,10 +17,10 @@ type cliCommand struct {
 }
 
 type config struct {
-	Next     *string
-	Previous *string
-	Cache    *pokecache.Cache
-	UserDex  map[string]pokedata.Pokemon
+	nextLocationsURL     *string
+	previousLocationsURL *string
+	cache                *pokecache.Cache
+	userDex              map[string]pokedata.Pokemon
 }
 
 func cleanInput(text string) []string {

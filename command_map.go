@@ -8,44 +8,44 @@ import (
 
 func commandMap(cfg *config, args ...string) error {
 	url := "https://pokeapi.co/api/v2/location-area/"
-	if cfg.Next != nil {
-		url = *cfg.Next
+	if cfg.nextLocationsURL != nil {
+		url = *cfg.nextLocationsURL
 	}
-	if cfg.Previous != nil && cfg.Next == nil {
+	if cfg.previousLocationsURL != nil && cfg.nextLocationsURL == nil {
 		fmt.Println("You're on the last page")
 		return nil
 	}
 
-	locationAreas, err := pokedata.GetLocationAreas(url, cfg.Cache)
+	locationAreas, err := pokedata.GetLocationAreas(url, cfg.cache)
 	if err != nil {
 		return err
 	}
 	for _, result := range locationAreas.Results {
 		fmt.Println(result.Name)
 	}
-	cfg.Next = locationAreas.Next
-	cfg.Previous = locationAreas.Previous
+	cfg.nextLocationsURL = locationAreas.Next
+	cfg.previousLocationsURL = locationAreas.Previous
 	return nil
 }
 
 func commandMapb(cfg *config, args ...string) error {
 	url := "https://pokeapi.co/api/v2/location-area/"
-	if cfg.Previous != nil {
-		url = *cfg.Previous
+	if cfg.previousLocationsURL != nil {
+		url = *cfg.previousLocationsURL
 	}
-	if cfg.Previous == nil {
+	if cfg.previousLocationsURL == nil {
 		fmt.Println("You're on the first page")
 		return nil
 	}
 
-	locationAreas, err := pokedata.GetLocationAreas(url, cfg.Cache)
+	locationAreas, err := pokedata.GetLocationAreas(url, cfg.cache)
 	if err != nil {
 		return err
 	}
 	for _, result := range locationAreas.Results {
 		fmt.Println(result.Name)
 	}
-	cfg.Next = locationAreas.Next
-	cfg.Previous = locationAreas.Previous
+	cfg.nextLocationsURL = locationAreas.Next
+	cfg.previousLocationsURL = locationAreas.Previous
 	return nil
 }

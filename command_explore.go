@@ -12,7 +12,7 @@ func commandExplore(cfg *config, args ...string) error {
 	}
 	area := args[1]
 	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%v/", area)
-	locationArea, err := pokedata.GetLocationArea(url, cfg.Cache)
+	locationArea, err := pokedata.GetLocationArea(url, cfg.cache)
 	if err != nil {
 		return fmt.Errorf("%v is not a valid area", area)
 	}

@@ -7,10 +7,10 @@ func commandInspect(cfg *config, args ...string) error {
 		return fmt.Errorf("Please enter a valid Pokemon")
 	}
 	pokemon := args[1]
-	if _, ok := cfg.UserDex[pokemon]; !ok {
+	if _, ok := cfg.userDex[pokemon]; !ok {
 		return fmt.Errorf("You have not caught that Pokemon")
 	}
-	currentPokemon := cfg.UserDex[pokemon]
+	currentPokemon := cfg.userDex[pokemon]
 	fmt.Printf("Name: %v\n", currentPokemon.Name)
 	fmt.Printf("Height: %v\n", currentPokemon.Height)
 	fmt.Printf("Weight: %v\n", currentPokemon.Weight)

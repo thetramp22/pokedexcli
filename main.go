@@ -10,10 +10,8 @@ import (
 func main() {
 	interval := 5 * time.Second
 	cfg := config{
-		Next:     nil,
-		Previous: nil,
-		Cache:    pokecache.NewCache(interval),
-		UserDex:  map[string]pokedata.Pokemon{},
+		cache:   pokecache.NewCache(interval),
+		userDex: map[string]pokedata.Pokemon{},
 	}
 	startRepl(&cfg)
 }
