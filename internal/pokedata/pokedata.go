@@ -9,18 +9,6 @@ import (
 	"github.com/thetramp22/pokedexcli/internal/pokecache"
 )
 
-type LocationAreas struct {
-	Count    int       `json:"count"`
-	Next     *string   `json:"next"`
-	Previous *string   `json:"previous"`
-	Results  []Results `json:"results"`
-}
-
-type Results struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
-}
-
 func GetLocationAreas(url string, cache *pokecache.Cache) (LocationAreas, error) {
 	data := []byte{}
 
@@ -54,16 +42,6 @@ func GetLocationAreas(url string, cache *pokecache.Cache) (LocationAreas, error)
 	return locationAreas, nil
 }
 
-type LocationArea struct {
-	Name              string `json:"name"`
-	PokemonEncounters []struct {
-		Pokemon struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"pokemon"`
-	} `json:"pokemon_encounters"`
-}
-
 func GetLocationArea(url string, cache *pokecache.Cache) (LocationArea, error) {
 	data := []byte{}
 
@@ -95,25 +73,6 @@ func GetLocationArea(url string, cache *pokecache.Cache) (LocationArea, error) {
 	}
 	cache.Add(url, data)
 	return locationArea, nil
-}
-
-type Pokemon struct {
-	Id             int    `json:"id"`
-	Name           string `json:"name"`
-	BaseExperience int    `json:"base_experience"`
-	Height         int    `json:"height"`
-	Weight         int    `json:"weight"`
-	Stats          []struct {
-		BaseStat int `json:"base_stat"`
-		Stat     struct {
-			Name string `json:"name"`
-		} `json:"stat"`
-	} `json:"stats"`
-	Types []struct {
-		Type struct {
-			Name string `json:"name"`
-		} `json:"type"`
-	} `json:"types"`
 }
 
 func GetPokemon(url string, cache *pokecache.Cache) (Pokemon, error) {
